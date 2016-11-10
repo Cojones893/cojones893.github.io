@@ -1,0 +1,15 @@
+.row div{
+	-webkit-transition: width 0.3s ease, margin 0.3s ease;
+    -moz-transition: width 0.3s ease, margin 0.3s ease;
+    -o-transition: width 0.3s ease, margin 0.3s ease;
+    transition: width 0.3s ease, margin 0.3s ease;
+}
+#col1 {
+	position:absolute;
+}
+#money_li{
+	position: absolute;
+	right:80px;
+	top:16px;
+	color: #FFFFFF;
+}
