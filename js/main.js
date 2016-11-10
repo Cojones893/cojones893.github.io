@@ -23,6 +23,8 @@ $(document).ready(function () {
 		buttonTextInt++;
 		if(buttonTextInt>=13){
 			$("#mainBtn").addClass("btn btn-lg btn-danger center-block");
+			$("#col1").css("padding-left", Math.round(Math.random()*(totalWidth-startWidth)));
+			$("#col1").css("padding-top", Math.round(Math.random()*(totalHeight-startHeight)));
 		}
 	});
 });
