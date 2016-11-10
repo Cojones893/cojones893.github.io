@@ -13,9 +13,16 @@ $(document).ready(function () {
 	$('#col1').css('padding-left', (totalWidth/2)-startWidth/2);
 	$('#col1').css('padding-top', (totalHeight/2)-startHeight/2);
 	$('#mainBtn').css('marginTop', 20);
-	$("#money_li").html('<b>'+i+'</b>')
+	$("#money_li").html('<b>'+i+'</b>');
+	var buttonTextInt = 0;
+	var buttonText = ["C", "Cl", "Cli", "Clic", "Click", "Click m", "Click me", " Click me", "t Click me", "'t Click me", "n't Click me", "on't Click me", "Don't Click Me"];
 	$("#mainBtn").button().click(function(){
 		i++;
-		$("#money_li").html('<b>'+i+'</b>')
+		$("#money_li").html('<b>'+i+'</b>');
+		$("#mainBtn").html(buttonText[buttonTextInt]);
+		buttonTextInt++;
+		if(buttonTextInt>=13){
+			$("#mainBtn").addClass("btn btn-lg btn-danger center-block");
+		}
 	});
 });
