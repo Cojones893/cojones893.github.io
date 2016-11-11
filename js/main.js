@@ -18,6 +18,7 @@ $(document).ready(function () {
 	var buttonText = ["C", "Cl", "Cli", "Clic", "Click", "Click m", "Click me", " Click me", "t Click me", "'t Click me", "n't Click me", "on't Click me", "Don't Click Me"];
 	$("#mainBtn").button().click(function(){
 		i++;
+		$('#mainBtn').blur();
 		$("#money_li").html('<b>'+i+'</b>');
 		$("#mainBtn").html(buttonText[buttonTextInt]);
 		startWidth = $("#mainBtn").width();
@@ -34,4 +35,14 @@ $(document).ready(function () {
 			$("#mainBtn").addClass("btn btn-xs btn-danger center-block");
 		}
 	});
+
 });
+$(document).keydown(function (e) 
+{
+    var keycode1 = (e.keyCode ? e.keyCode : e.which);
+    if (keycode1 == 0 || keycode1 == 9) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+});
+
