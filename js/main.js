@@ -1,48 +1,101 @@
 $(document).ready(function () {
-	var totalWidth = $( window ).width();
-	var totalHeight = $( window ).height();
-	var startWidth = $("#mainBtn").width();
-	var startHeight = $("#mainBtn").width();
+	//-------CANVAS----------
+	var myCanvas = document.getElementById("game_window");
+	var options = {
+	view:myCanvas,
+	resolution:1,
+	backgroundColor : 0x708090,
+	antialias: true
+	};	
+	var renderer = PIXI.autoDetectRenderer(1400, 900, options);
+	document.body.appendChild(renderer.view);
 	
-	var widthOffset = 0;
-	var heightOffset = 0;
-	var i=0;
-	$('#panel1').css('width', startWidth);
-	$('#panel1').css('height', startHeight);
-	$('#panel1').css('height', startHeight);
-	$('#col1').css('padding-left', (totalWidth/2)-startWidth/2);
-	$('#col1').css('padding-top', (totalHeight/2)-startHeight/2);
-	$('#mainBtn').css('marginTop', 20);
-	$("#money_li").html('<b>'+i+'</b>');
-	var buttonTextInt = 0;
-	var buttonText = ["C", "Cl", "Cli", "Clic", "Click", "Click m", "Click me", " Click me", "t Click me", "'t Click me", "n't Click me", "on't Click me", "Don't Click Me"];
-	$("#mainBtn").button().click(function(){
-		i++;
-		$('#mainBtn').blur();
-		$("#money_li").html('<b>'+i+'</b>');
-		$("#mainBtn").html(buttonText[buttonTextInt]);
-		startWidth = $("#mainBtn").width();
-		$('#col1').css('padding-left', (totalWidth/2)-startWidth/2);
-		buttonTextInt++;
-		if(buttonTextInt>=13){
-			$("#mainBtn").addClass("btn btn-lg btn-danger center-block");
-			$("#col1").css("padding-left", Math.round(Math.random()*(totalWidth-(startWidth*2))));
-			$("#col1").css("padding-top", Math.round(Math.random()*(totalHeight-(startHeight*3)))-startHeight*3);
-		}
-		if(buttonTextInt==20){
-			$("#mainBtn").addClass("btn btn-sm btn-danger center-block");
-		}if(buttonTextInt==30){
-			$("#mainBtn").addClass("btn btn-xs btn-danger center-block");
-		}
-	});
+	var stage = new PIXI.Container();
+	stage.interactive = true;
+	//-----------------------
+	
+	
+	//--------BUTTON---------
+	var buttonWords = ["+", "C", "Cl", "Cli", "Clic", "Click", "Click M", "Click Me", "t Click Me", "'t Click Me", "n't Click Me", "on't Click Me", "Don't Click Me", "Don't Click Me!"];
+	var basicText;
+	buttonWordsPos = 0;
+	
+	var buttonObj = new PIXI.Container();
+	var buttonGraphics;
+	
+	var gameStart = false;
+	//-----------------------
+	
+	//----GAME VARIABLES-----
+	
+	var click = 0;
+	
+	//-----------------------
+	
+	animate();
+	buildButton("ASD")
+	function animate() {
 
-});
-$(document).keydown(function (e) 
-{
-    var keycode1 = (e.keyCode ? e.keyCode : e.which);
-    if (keycode1 == 0 || keycode1 == 9) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
+		renderer.render(stage);
+		requestAnimationFrame( animate );
+	}
+	function buildButton(txt){
+		buttonGraphics = new PIXI.Graphics();
+		
+		// set a fill and line style
+		buttonGraphics.lineStyle(2, 0x36454f, 1);
+		buttonGraphics.beginFill(0x708090, 0.25);
+		buttonGraphics.drawRoundedRect(0, 0, 100, 50, 5);
+		buttonGraphics.endFill();
+		
+		basicText = new PIXI.Text(buttonWords[buttonWordsPos]);
+		
+		
+		buttonObj.addChild(buttonGraphics);
+		buttonObj.addChild(basicText);
+		
+		buttonObj.x = 700-(buttonGraphics.width/2);
+		buttonObj.y = 450-(buttonGraphics.height/2);
+		
+		stage.addChild(buttonObj);
+		
+		basicText.x = 45;
+		basicText.y = 7;
+		
+		buttonObj.interactive = true;
+		buttonObj.on('mousedown', onDown);
+		buttonObj.on('touchstart', onDown);
+	}
+	
+	function onDown (eventData) {
+		if(!gameStart){
+			spellOutButton();
+		}else{
+			moveButton();
+		}
+	}
+	
+	function moveButton(){
+		buttonObj.x = Math.random()*900+200;
+		buttonObj.y = Math.random()*500+200;
+	}
+	function spellOutButton(){
+		buttonWordsPos+=1;
+		basicText.text = buttonWords[buttonWordsPos];
+		
+		buttonGraphics.clear();
+		
+		// set a fill and line style
+		buttonGraphics.lineStyle(2, 0x36454f, 1);
+		buttonGraphics.beginFill(0x708090, 0.25);
+		buttonGraphics.drawRoundedRect(0, 0, 90+(basicText.width), 50, 5);
+		buttonGraphics.endFill();
+		
+		buttonObj.x = 700-(buttonGraphics.width/2);
+		buttonObj.y = 450-(buttonGraphics.height/2);
+		if(buttonWordsPos>=13){
+			gameStart=true;
+		}
+	}
 });
 
