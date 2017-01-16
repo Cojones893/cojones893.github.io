@@ -29,13 +29,67 @@ $(document).ready(function () {
 	//----GAME VARIABLES-----
 	
 	var click = 0;
+	var totalClick = 0;
 	
 	//-----------------------
 	
+	//------UI Elements------
+	
+	var counter;
+	var money;
+	var time;
+	
+	var counterStyle = {
+		align:"right"
+	};
+	
+	//-----------------------
+	
+	buildUI();
+	
 	animate();
-	buildButton("ASD")
-	function animate() {
+	buildButton("ASD");
+	
+	stage.hitArea = new PIXI.Rectangle(0, 0, 1400, 900);
+	
+	var clickCircle;
+	
+	function buildUI(){
+		counter = new PIXI.Text(click.toString(), counterStyle);
+		counter.x = 1390-counter.width;
+		counter.y = 10;
+		stage.addChild(counter);
+		
+		stage.on('mousedown', clickedStage);
+	}
+	
+	function clickedStage(eventData){
+		var circle = {
+			x: eventData.data.originalEvent.offsetX,
+			y: eventData.data.originalEvent.offsetY,
+			r: 100
+		};
+		var rect = {
+			x: buttonObj.x,
+			y: buttonObj.y,
+			w: buttonGraphics.width,
+			h: buttonGraphics.height
+		};
+		clickCircle = new PIXI.Graphics();
+		clickCircle.beginFill(0x536872,.5);
+		clickCircle.drawCircle(circle.x, circle.y,circle.r);
+		clickCircle.endFill();
+		stage.addChild(clickCircle);
 
+		//console.log(rect.x, rect.y, rect.w, rect.h);
+		//console.log("mouse", circle.x, circle.y);
+		if(RectCircleColliding(circle,rect)){
+			buttonClicked();
+		}		
+	}
+	
+	function animate() {
+		
 		renderer.render(stage);
 		requestAnimationFrame( animate );
 	}
@@ -61,23 +115,57 @@ $(document).ready(function () {
 		
 		basicText.x = 45;
 		basicText.y = 7;
-		
-		buttonObj.interactive = true;
-		buttonObj.on('mousedown', onDown);
-		buttonObj.on('touchstart', onDown);
+		//console.log("btn", buttonObj.x, buttonObj.y, buttonGraphics.width, buttonGraphics.height)
+		//buttonObj.interactive = true;
+		//buttonObj.on('mousedown', onDown);
+		//buttonObj.on('touchstart', onDown);
 	}
-	
-	function onDown (eventData) {
+	function RectCircleColliding(circle, rect) {
+		var distX = Math.abs(circle.x - rect.x - rect.w / 2);
+		var distY = Math.abs(circle.y - rect.y - rect.h / 2);
+
+		if (distX > (rect.w / 2 + circle.r)) {
+			return false;
+		}
+		if (distY > (rect.h / 2 + circle.r)) {
+			return false;
+		}
+
+		if (distX <= (rect.w / 2)) {
+			return true;
+		}
+		if (distY <= (rect.h / 2)) {
+			return true;
+		}
+
+		var dx = distX - rect.w / 2;
+		var dy = distY - rect.h / 2;
+		return (dx * dx + dy * dy <= (circle.r * circle.r));
+	}
+
+	function buttonClicked () {
+		click+=1;
+		totalClick +=1;
+		counter.text = (click.toString());
+		counter.x = 1390-counter.width;
 		if(!gameStart){
 			spellOutButton();
 		}else{
 			moveButton();
 		}
+		
 	}
 	
 	function moveButton(){
 		buttonObj.x = Math.random()*900+200;
 		buttonObj.y = Math.random()*500+200;
+		if(totalClick == 20){
+			buttonObj.scale.x = .75;
+			buttonObj.scale.y = .75;
+		}if(totalClick == 40){
+			buttonObj.scale.x = .5;
+			buttonObj.scale.y = .5;
+		}
 	}
 	function spellOutButton(){
 		buttonWordsPos+=1;
