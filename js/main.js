@@ -24,12 +24,20 @@ $(document).ready(function () {
 	var buttonGraphics;
 	
 	var gameStart = false;
+	
+	var purchaseLargerCircleGraphics;
+	var purchaseLargerCircleObj = new PIXI.Container();
+	var purchaseLargerCircleText;
+	var purchaseLargerCircleCost = 10;
+	
 	//-----------------------
 	
 	//----GAME VARIABLES-----
 	
 	var click = 0;
 	var totalClick = 0;
+	
+	var circleRadius = 1;
 	
 	//-----------------------
 	
@@ -55,6 +63,7 @@ $(document).ready(function () {
 	var clickCircle;
 	
 	function buildUI(){
+		stage.removeChild(counter);
 		counter = new PIXI.Text(click.toString(), counterStyle);
 		counter.x = 1390-counter.width;
 		counter.y = 10;
@@ -67,7 +76,7 @@ $(document).ready(function () {
 		var circle = {
 			x: eventData.data.originalEvent.offsetX,
 			y: eventData.data.originalEvent.offsetY,
-			r: 100
+			r: circleRadius
 		};
 		var rect = {
 			x: buttonObj.x,
@@ -80,14 +89,21 @@ $(document).ready(function () {
 		clickCircle.drawCircle(circle.x, circle.y,circle.r);
 		clickCircle.endFill();
 		stage.addChild(clickCircle);
-
+		setTimeout(removeCircle, 50, clickCircle);
 		//console.log(rect.x, rect.y, rect.w, rect.h);
 		//console.log("mouse", circle.x, circle.y);
 		if(RectCircleColliding(circle,rect)){
 			buttonClicked();
 		}		
 	}
-	
+	function removeCircle(cir){
+		cir.alpha -=.12;
+		if(cir.alpha>=.1){
+			setTimeout(removeCircle, 100, cir);
+		}else{
+			stage.removeChild(cir);
+		}
+	}
 	function animate() {
 		
 		renderer.render(stage);
@@ -115,10 +131,6 @@ $(document).ready(function () {
 		
 		basicText.x = 45;
 		basicText.y = 7;
-		//console.log("btn", buttonObj.x, buttonObj.y, buttonGraphics.width, buttonGraphics.height)
-		//buttonObj.interactive = true;
-		//buttonObj.on('mousedown', onDown);
-		//buttonObj.on('touchstart', onDown);
 	}
 	function RectCircleColliding(circle, rect) {
 		var distX = Math.abs(circle.x - rect.x - rect.w / 2);
@@ -142,12 +154,62 @@ $(document).ready(function () {
 		var dy = distY - rect.h / 2;
 		return (dx * dx + dy * dy <= (circle.r * circle.r));
 	}
-
+	function updateUI(){
+		
+		if(totalClick>20 && purchaseLargerCircleGraphics==undefined){
+			purchaseLargerCircleGraphics = new PIXI.Graphics();
+			
+			// set a fill and line style
+			purchaseLargerCircleGraphics.lineStyle(2, 0x36454f, 1);
+			purchaseLargerCircleGraphics.beginFill(0x708090, 0.25);
+			purchaseLargerCircleGraphics.drawRoundedRect(0, 0, 250, 50, 5);
+			purchaseLargerCircleGraphics.endFill();
+			
+			purchaseLargerCircleText = new PIXI.Text("Bigger Hit Area - 10");
+			
+			
+			purchaseLargerCircleObj.addChild(purchaseLargerCircleGraphics);
+			purchaseLargerCircleObj.addChild(purchaseLargerCircleText);
+			
+			purchaseLargerCircleObj.x = 10;
+			purchaseLargerCircleObj.y = 10;
+			
+			stage.addChild(purchaseLargerCircleObj);
+			
+			purchaseLargerCircleText.x = 10;
+			purchaseLargerCircleText.y = 7;
+			
+			purchaseLargerCircleObj.scale.x=.75;
+			purchaseLargerCircleObj.scale.y=.75;
+			//console.log("btn", buttonObj.x, buttonObj.y, buttonGraphics.width, buttonGraphics.height)
+			purchaseLargerCircleObj.interactive = true;
+			purchaseLargerCircleObj.on('mousedown', onPurchaseLargerCircle);
+			purchaseLargerCircleObj.on('touchstart', onPurchaseLargerCircle);
+			
+		}
+		counter.text = (click.toString());
+		counter.x = 1390-counter.width;
+	}
+	function onPurchaseLargerCircle(eventData){
+		console.log(click, purchaseLargerCircleCost);
+		if(click>=purchaseLargerCircleCost){
+			click -= purchaseLargerCircleCost;
+			purchaseLargerCircleObj.removeChild(purchaseLargerCircleText);
+			purchaseLargerCircleCost = Math.ceil(purchaseLargerCircleCost*1.2);
+			purchaseLargerCircleText = new PIXI.Text("Bigger Hit Area - " + purchaseLargerCircleCost.toString());
+			purchaseLargerCircleObj.addChild(purchaseLargerCircleText);
+			purchaseLargerCircleText.x = 10;
+			purchaseLargerCircleText.y = 7;
+			
+			circleRadius+=10;
+			updateUI();
+		}
+	}
 	function buttonClicked () {
 		click+=1;
 		totalClick +=1;
-		counter.text = (click.toString());
-		counter.x = 1390-counter.width;
+		
+		updateUI();
 		if(!gameStart){
 			spellOutButton();
 		}else{
