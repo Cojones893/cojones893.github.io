@@ -2,12 +2,14 @@ $(document).ready(function () {
 	//-------CANVAS----------
 	var myCanvas = document.getElementById("game_window");
 	var options = {
-	view:myCanvas,
-	resolution:1,
-	backgroundColor : 0x708090,
-	antialias: true
-	};	
-	var renderer = PIXI.autoDetectRenderer(1400, 900, options);
+		view:myCanvas,
+		resolution:1,
+		backgroundColor : 0x708090,
+		antialias: true
+	};
+	var GAME_HEIGHT = 900;
+	var GAME_WIDTH = 1400;
+	var renderer = PIXI.autoDetectRenderer(GAME_WIDTH, GAME_HEIGHT, options);
 	document.body.appendChild(renderer.view);
 	
 	var stage = new PIXI.Container();
@@ -39,6 +41,8 @@ $(document).ready(function () {
 	
 	var circleRadius = 1;
 	
+	
+	var bullet;
 	//-----------------------
 	
 	//------UI Elements------
@@ -51,6 +55,12 @@ $(document).ready(function () {
 		align:"right"
 	};
 	
+	var fpsStyle = {
+		align:"right",
+		fontSize: 10
+	};
+	var fpsPoll = [60];
+	var fpsReset = 0;
 	//-----------------------
 	
 	buildUI();
@@ -62,12 +72,21 @@ $(document).ready(function () {
 	
 	var clickCircle;
 	
+	var lastLoop = new Date;
+	
+	
+	
 	function buildUI(){
 		stage.removeChild(counter);
 		counter = new PIXI.Text(click.toString(), counterStyle);
 		counter.x = 1390-counter.width;
 		counter.y = 10;
 		stage.addChild(counter);
+		
+		fpsCounter = new PIXI.Text(click.toString(), fpsStyle);
+		fpsCounter.x = 1390-counter.width;
+		fpsCounter.y = 5;
+		stage.addChild(fpsCounter);
 		
 		stage.on('mousedown', clickedStage);
 	}
@@ -81,8 +100,8 @@ $(document).ready(function () {
 		var rect = {
 			x: buttonObj.x,
 			y: buttonObj.y,
-			w: buttonGraphics.width,
-			h: buttonGraphics.height
+			w: buttonGraphics.width * buttonObj.scale.x,
+			h: buttonGraphics.height * buttonObj.scale.y
 		};
 		clickCircle = new PIXI.Graphics();
 		clickCircle.beginFill(0x536872,.5);
@@ -105,7 +124,24 @@ $(document).ready(function () {
 		}
 	}
 	function animate() {
+		var thisLoop = new Date;
+		var fps = 1000 / (thisLoop - lastLoop);
+		lastLoop = thisLoop;
+		fpsPoll.push(fps);
+		fpsTotal = 0;
+		for(var i = 0; i<fpsPoll.length; i++){
+			fpsTotal += fpsPoll[i];
+		}
 		
+		if(fpsPoll.length>20){
+			fpsPoll.shift();
+			
+		}
+		fpsReset +=1;
+		if(fpsReset>60){
+			fpsReset = 0;
+			fpsCounter.text = ((fpsTotal/fpsPoll.length).toString());
+		}
 		renderer.render(stage);
 		requestAnimationFrame( animate );
 	}
@@ -167,7 +203,6 @@ $(document).ready(function () {
 			
 			purchaseLargerCircleText = new PIXI.Text("Bigger Hit Area - 10");
 			
-			
 			purchaseLargerCircleObj.addChild(purchaseLargerCircleGraphics);
 			purchaseLargerCircleObj.addChild(purchaseLargerCircleText);
 			
@@ -215,7 +250,6 @@ $(document).ready(function () {
 		}else{
 			moveButton();
 		}
-		
 	}
 	
 	function moveButton(){
@@ -247,5 +281,131 @@ $(document).ready(function () {
 			gameStart=true;
 		}
 	}
+	
+	//-------TURRET--------------
+	/*
+	
+	functions:
+		Draw()
+			Draws the turret to the screen and starts the shooting process
+		startShooting()
+			Spawns bullets
+
+	*/
+	
+	function Turret(x, y, speed){
+
+		// Add object properties like this
+		this.x = x;
+		this.y = y;
+		this.speed = speed;
+	    this.i = 0;
+		
+	}
+	Turret.prototype.draw = function(){
+		this.turretGraphics = new PIXI.Graphics();
+		this.turretGraphics.lineStyle(2, 0x36454f, 1);
+		this.turretGraphics.beginFill(0x708090, 0.25);
+		this.turretGraphics.drawRoundedRect(0, 0, 50, 50, 5);
+		this.turretGraphics.endFill();
+		stage.addChild(this.turretGraphics);
+		this.turretGraphics.x = this.x;
+		this.turretGraphics.y = this.y;
+		
+		setTimeout(this.startShooting, 200, this);
+	};
+	Turret.prototype.startShooting = function(t){
+		t.i+=1;
+		if(t.i>t.speed){
+			t.i=0;
+			bullet = new Bullet(t.x,850, 5);
+			bullet.draw();
+			
+		}setTimeout(t.startShooting, 200, t);
+	};
+	
+	//----------------------------------
+	
+	//-----------BULLET-----------------
+	/*
+	
+	functions:
+		Draw()
+			Draws the bullet to the screen and starts the moving process
+		bulletMovement()
+			moves bullets
+	
+	*/
+	
+	Bullet.prototype.draw = function(){
+	    this.bulletContainer = new PIXI.Container();
+		this.bulletGraphics = new PIXI.Graphics();
+		this.bulletGraphics.lineStyle(2, 0x36454f, 1);
+		this.bulletGraphics.beginFill(0x708090, 0.25);
+		this.bulletGraphics.drawCircle(0, 0,10);
+		this.bulletGraphics.endFill();
+		this.bulletContainer.addChild(this.bulletGraphics)
+		stage.addChild(this.bulletContainer);
+		this.bulletContainer.x = this.x+25;
+		this.bulletContainer.y = this.y;
+		
+		setTimeout(this.bulletMovement, 16, this);
+	};
+	Bullet.prototype.bulletMovement = function(t){
+		t.bulletContainer.y-=5;
+		var circle = {
+			x: t.bulletContainer.x,
+			y: t.bulletContainer.y,
+			r: 5
+		};
+		var rect = {
+			x: buttonObj.x,
+			y: buttonObj.y,
+			w: buttonGraphics.width * buttonObj.scale.x,
+			h: buttonGraphics.height * buttonObj.scale.y
+		};
+		if(RectCircleColliding(circle,rect)){
+			buttonClicked();
+			t.bulletContainer.destroy();
+		}else{
+			if(t.bulletContainer.y<100){
+				t.bulletContainer.destroy();
+			}else{
+				setTimeout(t.bulletMovement, 16, t);
+			}
+		}
+	};
+	
+
+	var turretT = [];
+	for(var i = 0; i<14; i++){
+		turretT.push(new Turret((i*100)+50,850,1));
+
+		turretT[i].draw();
+	}
+	
+	
+	function Bullet(x,y,v){
+		this.x = x;
+		this.y = y;
+		this.v = v;
+	}
+	
+	
+	//-------NEEDS WORK-------------
+	/*window.addEventListener("resize", resize);
+	function resize() {
+	 
+	  // Determine which screen dimension is most constrained
+	  ratio = Math.min(window.innerWidth/GAME_WIDTH,
+					   window.innerHeight/GAME_HEIGHT);
+	 
+	  // Scale the view appropriately to fill that dimension
+	  stage.scale.x = stage.scale.y = ratio;
+	 
+	  // Update the renderer dimensions
+	  renderer.resize(Math.ceil(GAME_WIDTH * ratio),
+					  Math.ceil(GAME_HEIGHT * ratio));
+	}*/
 });
 
