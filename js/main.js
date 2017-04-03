@@ -66,7 +66,7 @@ $(document).ready(function () {
 	buildUI();
 	
 	animate();
-	buildButton("ASD");
+	buildButton("ASD", 700, 400);
 	
 	stage.hitArea = new PIXI.Rectangle(0, 0, 1400, 900);
 	
@@ -92,33 +92,35 @@ $(document).ready(function () {
 	}
 	
 	function clickedStage(eventData){
-		var circle = {
-			x: eventData.data.originalEvent.offsetX,
-			y: eventData.data.originalEvent.offsetY,
-			r: circleRadius
-		};
-		var rect = {
-			x: buttonObj.x,
-			y: buttonObj.y,
-			w: buttonGraphics.width * buttonObj.scale.x,
-			h: buttonGraphics.height * buttonObj.scale.y
-		};
-		clickCircle = new PIXI.Graphics();
-		clickCircle.beginFill(0x536872,.5);
-		clickCircle.drawCircle(circle.x, circle.y,circle.r);
-		clickCircle.endFill();
-		stage.addChild(clickCircle);
-		setTimeout(removeCircle, 50, clickCircle);
-		//console.log(rect.x, rect.y, rect.w, rect.h);
-		//console.log("mouse", circle.x, circle.y);
-		if(RectCircleColliding(circle,rect)){
-			buttonClicked();
+		if(eventData.data.originalEvent.offsetY>50){
+			var circle = {
+				x: eventData.data.originalEvent.offsetX,
+				y: eventData.data.originalEvent.offsetY,
+				r: circleRadius
+			};
+			var rect = {
+				x: buttonObj.x,
+				y: buttonObj.y,
+				w: buttonGraphics.width * buttonObj.scale.x,
+				h: buttonGraphics.height * buttonObj.scale.y
+			};
+			clickCircle = new PIXI.Graphics();
+			clickCircle.beginFill(0x536872,.5);
+			clickCircle.drawCircle(circle.x, circle.y,circle.r);
+			clickCircle.endFill();
+			stage.addChild(clickCircle);
+			setTimeout(removeCircle, 25, clickCircle);
+			//console.log(rect.x, rect.y, rect.w, rect.h);
+			//console.log("mouse", circle.x, circle.y);
+			if(RectCircleColliding(circle,rect)){
+				buttonClicked();
+			}	
 		}		
 	}
 	function removeCircle(cir){
 		cir.alpha -=.12;
 		if(cir.alpha>=.1){
-			setTimeout(removeCircle, 100, cir);
+			setTimeout(removeCircle, 25, cir);
 		}else{
 			stage.removeChild(cir);
 		}
@@ -145,7 +147,7 @@ $(document).ready(function () {
 		renderer.render(stage);
 		requestAnimationFrame( animate );
 	}
-	function buildButton(txt){
+	function buildButton(txt, x, y){
 		buttonGraphics = new PIXI.Graphics();
 		
 		// set a fill and line style
@@ -275,8 +277,8 @@ $(document).ready(function () {
 		buttonGraphics.drawRoundedRect(0, 0, 90+(basicText.width), 50, 5);
 		buttonGraphics.endFill();
 		
-		buttonObj.x = 700-(buttonGraphics.width/2);
-		buttonObj.y = 450-(buttonGraphics.height/2);
+		buttonObj.x = GAME_WIDTH/2-(buttonGraphics.width/2);
+		buttonObj.y = GAME_HEIGHT/2-(buttonGraphics.height/2);
 		if(buttonWordsPos>=13){
 			gameStart=true;
 		}
@@ -328,7 +330,7 @@ $(document).ready(function () {
 	
 	//-----------BULLET-----------------
 	/*
-	
+		
 	functions:
 		Draw()
 			Draws the bullet to the screen and starts the moving process
@@ -349,10 +351,12 @@ $(document).ready(function () {
 		this.bulletContainer.x = this.x+25;
 		this.bulletContainer.y = this.y;
 		
-		setTimeout(this.bulletMovement, 16, this);
+		setTimeout(this.bulletMovement, Math.round(Math.random()*500), this);
 	};
+	
+	
 	Bullet.prototype.bulletMovement = function(t){
-		t.bulletContainer.y-=5;
+		t.bulletContainer.y-=10;
 		var circle = {
 			x: t.bulletContainer.x,
 			y: t.bulletContainer.y,
@@ -376,20 +380,23 @@ $(document).ready(function () {
 		}
 	};
 	
-
-	var turretT = [];
-	for(var i = 0; i<14; i++){
-		turretT.push(new Turret((i*100)+50,850,1));
-
-		turretT[i].draw();
-	}
-	
-	
 	function Bullet(x,y,v){
 		this.x = x;
 		this.y = y;
 		this.v = v;
 	}
+	
+	//----------------------------------
+	
+	/*var turretT = [];
+	for(var i = 0; i<70; i++){
+		turretT.push(new Turret((i*20)+25,850,1));
+
+		turretT[i].draw();
+	}*/
+	
+	
+	
 	
 	
 	//-------NEEDS WORK-------------
