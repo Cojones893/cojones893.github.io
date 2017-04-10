@@ -205,7 +205,7 @@ $(document).ready(function () {
 	}
 	function updateUI(){
 		
-		if(totalClick>20 && purchaseLargerCircleGraphics==undefined){
+		if(totalClick>5 && purchaseLargerCircleGraphics==undefined){
 			purchaseLargerCircleGraphics = new PIXI.Graphics();
 			
 			// set a fill and line style
@@ -234,7 +234,7 @@ $(document).ready(function () {
 			purchaseLargerCircleObj.on('touchstart', onPurchaseLargerCircle);
 			
 		}
-		if(totalClick>30 && purchaseTurretGraphics==undefined){
+		if(totalClick>20 && purchaseTurretGraphics==undefined){
 			
 			
 			purchaseTurretGraphics = new PIXI.Graphics();
