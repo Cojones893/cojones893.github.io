@@ -32,6 +32,12 @@ $(document).ready(function () {
 	var purchaseLargerCircleText;
 	var purchaseLargerCircleCost = 10;
 	
+	var purchaseTurretGraphics;
+	var purchaseTurretObj = new PIXI.Container();
+	var purchaseTurretText;
+	var purchaseTurretCost = 30;
+	
+	
 	//-----------------------
 	
 	//----GAME VARIABLES-----
@@ -41,8 +47,13 @@ $(document).ready(function () {
 	
 	var circleRadius = 1;
 	
+	var turretsArray = [];
 	
 	var bullet;
+	
+	var purchaseList = [{cost:20,exists:purchaseLargerCircleGraphics,graphics:purchaseLargerCircleGraphics, text:[purchaseLargerCircleText,"Bigger Hit Area - 10"], obj:[purchaseLargerCircleObj,10,10], event:onPurchaseLargerCircle},
+						{cost:30,exists:purchaseTurretGraphics,graphics:purchaseTurretGraphics,text:[purchaseTurretText, "Buy Turret - 30"], obj:[purchaseTurretObj,240,10], event:onPurchaseLargerCircle}];
+
 	//-----------------------
 	
 	//------UI Elements------
@@ -218,11 +229,40 @@ $(document).ready(function () {
 			
 			purchaseLargerCircleObj.scale.x=.75;
 			purchaseLargerCircleObj.scale.y=.75;
-			//console.log("btn", buttonObj.x, buttonObj.y, buttonGraphics.width, buttonGraphics.height)
 			purchaseLargerCircleObj.interactive = true;
 			purchaseLargerCircleObj.on('mousedown', onPurchaseLargerCircle);
 			purchaseLargerCircleObj.on('touchstart', onPurchaseLargerCircle);
 			
+		}
+		if(totalClick>30 && purchaseTurretGraphics==undefined){
+			
+			
+			purchaseTurretGraphics = new PIXI.Graphics();
+			
+			// set a fill and line style
+			purchaseTurretGraphics.lineStyle(2, 0x36454f, 1);
+			purchaseTurretGraphics.beginFill(0x708090, 0.25);
+			purchaseTurretGraphics.drawRoundedRect(0, 0, 250, 50, 5);
+			purchaseTurretGraphics.endFill();
+			
+			purchaseTurretText = new PIXI.Text("Buy Turret - 30");
+			
+			purchaseTurretObj.addChild(purchaseTurretGraphics);
+			purchaseTurretObj.addChild(purchaseTurretText);
+			
+			purchaseTurretObj.x = 240;
+			purchaseTurretObj.y = 10;
+			
+			stage.addChild(purchaseTurretObj);
+			
+			purchaseTurretText.x = 45;
+			purchaseTurretText.y = 7;
+			
+			purchaseTurretObj.scale.x=.75;
+			purchaseTurretObj.scale.y=.75;
+			purchaseTurretObj.interactive = true;
+			purchaseTurretObj.on('mousedown', onPurchaseTurret);
+			purchaseTurretObj.on('touchstart', onPurchaseTurret);
 		}
 		counter.text = (click.toString());
 		counter.x = 1390-counter.width;
@@ -239,6 +279,22 @@ $(document).ready(function () {
 			purchaseLargerCircleText.y = 7;
 			
 			circleRadius+=10;
+			updateUI();
+		}
+	}
+	
+	function onPurchaseTurret(eventData){
+		console.log(click, purchaseLargerCircleCost);
+		if(click>=purchaseLargerCircleCost){
+			click -= purchaseLargerCircleCost;
+			purchaseLargerCircleObj.removeChild(purchaseLargerCircleText);
+			purchaseLargerCircleCost = Math.ceil(purchaseLargerCircleCost*1.2);
+			purchaseLargerCircleText = new PIXI.Text("Bigger Hit Area - " + purchaseLargerCircleCost.toString());
+			purchaseLargerCircleObj.addChild(purchaseLargerCircleText);
+			purchaseLargerCircleText.x = 10;
+			purchaseLargerCircleText.y = 7;
+			turretsArray.push(new Turret((Math.random()*1300)+25,850,1).draw());
+
 			updateUI();
 		}
 	}
@@ -350,12 +406,13 @@ $(document).ready(function () {
 		stage.addChild(this.bulletContainer);
 		this.bulletContainer.x = this.x+25;
 		this.bulletContainer.y = this.y;
-		
-		setTimeout(this.bulletMovement, Math.round(Math.random()*500), this);
+		this.bulletGraphics.alpha=0;
+		setTimeout(this.bulletMovement, 16, this);
 	};
 	
 	
 	Bullet.prototype.bulletMovement = function(t){
+		t.bulletGraphics.alpha=1;
 		t.bulletContainer.y-=10;
 		var circle = {
 			x: t.bulletContainer.x,
@@ -388,7 +445,7 @@ $(document).ready(function () {
 	
 	//----------------------------------
 	
-	/*var turretT = [];
+	/*
 	for(var i = 0; i<70; i++){
 		turretT.push(new Turret((i*20)+25,850,1));
 
