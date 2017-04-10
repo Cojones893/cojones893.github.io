@@ -286,13 +286,13 @@ $(document).ready(function () {
 	function onPurchaseTurret(eventData){
 		console.log(click, purchaseLargerCircleCost);
 		if(click>=purchaseLargerCircleCost){
-			click -= purchaseLargerCircleCost;
-			purchaseLargerCircleObj.removeChild(purchaseLargerCircleText);
-			purchaseLargerCircleCost = Math.ceil(purchaseLargerCircleCost*1.2);
-			purchaseLargerCircleText = new PIXI.Text("Bigger Hit Area - " + purchaseLargerCircleCost.toString());
-			purchaseLargerCircleObj.addChild(purchaseLargerCircleText);
-			purchaseLargerCircleText.x = 10;
-			purchaseLargerCircleText.y = 7;
+			click -= 30;
+			//purchaseLargerCircleObj.removeChild(purchaseLargerCircleText);
+			//purchaseLargerCircleCost = Math.ceil(purchaseLargerCircleCost*1.2);
+			//purchaseLargerCircleText = new PIXI.Text("Bigger Hit Area - " + purchaseLargerCircleCost.toString());
+			//purchaseLargerCircleObj.addChild(purchaseLargerCircleText);
+			//purchaseLargerCircleText.x = 10;
+			//purchaseLargerCircleText.y = 7;
 			turretsArray.push(new Turret((Math.random()*1300)+25,850,1).draw());
 
 			updateUI();
