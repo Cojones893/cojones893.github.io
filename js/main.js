@@ -95,8 +95,8 @@ $(document).ready(function () {
 		stage.addChild(counter);
 		
 		fpsCounter = new PIXI.Text(click.toString(), fpsStyle);
-		fpsCounter.x = 1390-counter.width;
-		fpsCounter.y = 5;
+		fpsCounter.x = 1380-counter.width;
+		fpsCounter.y = 2;
 		stage.addChild(fpsCounter);
 		
 		stage.on('mousedown', clickedStage);
@@ -153,7 +153,7 @@ $(document).ready(function () {
 		fpsReset +=1;
 		if(fpsReset>60){
 			fpsReset = 0;
-			fpsCounter.text = ((fpsTotal/fpsPoll.length).toString());
+			fpsCounter.text = (Math.round(fpsTotal/fpsPoll.length).toString()) + " fps";
 		}
 		renderer.render(stage);
 		requestAnimationFrame( animate );
@@ -358,28 +358,64 @@ $(document).ready(function () {
 		this.y = y;
 		this.speed = speed;
 	    this.i = 0;
+		this.canShoot=true;
+		this.turretContainer = new PIXI.Container();
+		this.turretContainer.turretParent = this;
 		
 	}
 	Turret.prototype.draw = function(){
 		this.turretGraphics = new PIXI.Graphics();
+		
 		this.turretGraphics.lineStyle(2, 0x36454f, 1);
 		this.turretGraphics.beginFill(0x708090, 0.25);
 		this.turretGraphics.drawRoundedRect(0, 0, 50, 50, 5);
 		this.turretGraphics.endFill();
-		stage.addChild(this.turretGraphics);
+		this.turretContainer.addChild(this.turretGraphics);
+		stage.addChild(this.turretContainer);
 		this.turretGraphics.x = this.x;
 		this.turretGraphics.y = this.y;
-		
-		setTimeout(this.startShooting, 200, this);
+		this.turretGraphics.buttonMode = true;
+		this.turretGraphics.interactive = true;
+		this.turretGraphics.on('pointerdown', onDragStart)
+        .on('pointerup', onDragEnd)
+        .on('pointerupoutside', onDragEnd)
+        .on('pointermove', onDragMove);
+		setTimeout(this.startShooting, Math.random()*500, this);
 	};
+	
+	function onDragStart(event) {
+		this.data = event.data;
+		this.alpha = 0.5;
+		this.dragging = true;
+		this.parent.turretParent.canShoot=false;
+	}
+
+	function onDragEnd() {
+		this.alpha = 1;
+		this.dragging = false;
+		this.parent.turretParent.canShoot=true;
+		setTimeout(this.parent.turretParent.startShooting, Math.random()*500, this.parent.turretParent);
+		this.parent.turretParent.x = this.x;
+		this.data = null;
+	}
+
+	function onDragMove() {
+		if (this.dragging) {
+			var newPosition = this.data.getLocalPosition(this.parent);
+			this.x = newPosition.x;
+		}
+	}
+	
 	Turret.prototype.startShooting = function(t){
-		t.i+=1;
-		if(t.i>t.speed){
-			t.i=0;
-			bullet = new Bullet(t.x,850, 5);
-			bullet.draw();
-			
-		}setTimeout(t.startShooting, 200, t);
+		if(t.canShoot){
+			t.i+=1;
+			if(t.i>t.speed){
+				t.i=0;
+				bullet = new Bullet(t.x,850, 5);
+				bullet.draw();
+				
+			}setTimeout(t.startShooting, 200, t);
+		}
 	};
 	
 	//----------------------------------
@@ -446,10 +482,10 @@ $(document).ready(function () {
 	//----------------------------------
 	
 	/*
-	for(var i = 0; i<70; i++){
-		turretT.push(new Turret((i*20)+25,850,1));
+	for(var i = 0; i<140; i++){
+		turretsArray.push(new Turret((i*10)+25,850,1));
 
-		turretT[i].draw();
+		turretsArray[i].draw();
 	}*/
 	
 	
